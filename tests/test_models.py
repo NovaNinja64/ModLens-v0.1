@@ -76,7 +76,7 @@ def test_contract_models_are_immutable():
 
 
 def test_contract_models_reject_unknown_fields():
-    with pytest.raises(ValidationError, match="extra"):
+    with pytest.raises(ValidationError, match="Extra"):
         GameInstallation(
             game_id="skyrim-special-edition",
             name="Skyrim",
