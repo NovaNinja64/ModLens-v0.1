@@ -1,1 +1,3 @@
-"""ModLens desktop application."""\n\n__version__ = "0.1.0"\n
+﻿"""ModLens desktop application."""
+
+__version__ = "0.1.0"

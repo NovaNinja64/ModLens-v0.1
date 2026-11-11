@@ -86,15 +86,19 @@ def test_contract_models_reject_unknown_fields():
 
 
 def test_path_json_round_trip_uses_native_pydantic_serialization():
+    original_path = Path("G:/Games/Skyrim")
+
     game = GameInstallation(
         game_id="skyrim-special-edition",
         name="Skyrim Special Edition",
-        install_path=Path("G:/Games/Skyrim"),
+        install_path=original_path,
     )
+
     payload = game.model_dump(mode="json")
-    assert payload["install_path"] == "G:/Games/Skyrim"
-    restored = GameInstallation.model_validate(payload)
-    assert restored.install_path == game.install_path
+    assert Path(payload["install_path"]) == original_path
+
+    restored = GameInstallation.model_validate_json(game.model_dump_json())
+    assert restored.install_path == original_path
 
 
 def test_discovery_metadata_records_provenance_and_confidence():
