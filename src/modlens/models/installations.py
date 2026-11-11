@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 
@@ -37,7 +38,7 @@ class StorefrontLibrary(IdentifiedModel):
     library_path: Path
     name: str | None = None
     is_available: bool
-    last_checked_at: str | None = None
+    last_checked_at: datetime | None = None
 
 
 class GameInstallation(IdentifiedModel):
