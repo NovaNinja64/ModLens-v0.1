@@ -63,3 +63,9 @@ class ApplicationStartupError(ApplicationLifecycleError):
 
 class ApplicationShutdownError(ApplicationLifecycleError):
     """One or more application shutdown operations failed."""
+
+
+class TaskCancelledError(ModLensError):
+    """A task was cancelled through its cancellation token."""
+
+    
