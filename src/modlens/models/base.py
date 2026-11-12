@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from modlens.models.enums import DiscoveryConfidence, DiscoveryMethod
 
@@ -32,6 +32,14 @@ class DiscoveryMetadata(ContractModel):
     source: str = Field(min_length=1)
     evidence: tuple[str, ...] = ()
     discovered_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+    @field_validator("discovered_at")
+    @classmethod
+    def require_timezone_aware_discovered_at(cls, value: datetime) -> datetime:
+        """Reject ambiguous timestamps; callers must supply an explicit timezone."""
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("discovered_at must be timezone-aware.")
+        return value
 
 
 class IdentifiedModel(ContractModel):
