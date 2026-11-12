@@ -15,6 +15,9 @@ def install_fakes(monkeypatch, *, exec_error=None):
     calls = []
     lifecycle_instances = []
 
+    def fake_shutdown_logging():
+        calls.append("logging_shutdown")
+
     class TrackingLifecycle(ApplicationLifecycle):
         def __init__(self):
             super().__init__()
@@ -49,6 +52,9 @@ def install_fakes(monkeypatch, *, exec_error=None):
 
             self.aboutToQuit.callback()
             return 0
+        
+        def quit(self):
+            calls.append("quit")
 
     class FakeWindow:
         def __init__(self):
@@ -56,6 +62,9 @@ def install_fakes(monkeypatch, *, exec_error=None):
 
         def show(self):
             calls.append("show")
+
+        def close(self):
+            calls.append("close")
 
     config = SimpleNamespace(
         log_level="INFO",
@@ -83,6 +92,9 @@ def install_fakes(monkeypatch, *, exec_error=None):
     monkeypatch.setattr(
         app_module, "initialize_database", initialize_database
     )
+    monkeypatch.setattr(
+        app_module, "shutdown_logging", fake_shutdown_logging
+    )
 
     return calls, lifecycle_instances
 
@@ -102,6 +114,9 @@ def test_application_starts_and_shuts_down_in_order(monkeypatch):
         "show",
         "exec",
         "shutdown",
+        "close",
+        "quit",
+        "logging_shutdown",
     ]
     assert lifecycle_instances[0].state is LifecycleState.STOPPED
     assert lifecycle_instances[0].shutdown_calls == 1
@@ -123,6 +138,7 @@ def test_startup_failure_prevents_qt_initialization(monkeypatch):
     assert "qt" not in calls
     assert lifecycle_instances[0].state is LifecycleState.FAILED
     assert lifecycle_instances[0].shutdown_calls == 0
+    assert calls[-1] == "logging_shutdown"
 
 
 def test_event_loop_failure_still_triggers_shutdown(monkeypatch):
@@ -134,6 +150,12 @@ def test_event_loop_failure_still_triggers_shutdown(monkeypatch):
     with pytest.raises(RuntimeError, match="Qt event loop failed"):
         app_module.main()
 
-    assert calls[-2:] == ["exec", "shutdown"]
+    assert calls[-5:] == [
+        "exec",
+        "shutdown",
+        "close",
+        "quit",
+        "logging_shutdown",
+    ]
     assert lifecycle_instances[0].state is LifecycleState.STOPPED
     assert lifecycle_instances[0].shutdown_calls == 1

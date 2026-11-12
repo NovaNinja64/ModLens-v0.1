@@ -1,8 +1,11 @@
 
+"""ModLens application entry point."""
+
 from __future__ import annotations
 
 import logging
 import sys
+from collections.abc import Callable
 
 from PySide6.QtWidgets import QApplication
 
@@ -12,7 +15,7 @@ from modlens.core.application_lifecycle import (
 )
 from modlens.core.config import AppConfig, load_config
 from modlens.core.exceptions import ApplicationShutdownError
-from modlens.core.logging import configure_logging
+from modlens.core.logging import configure_logging, shutdown_logging
 from modlens.storage.database import initialize_database
 from modlens.ui.main_window import MainWindow
 
@@ -37,16 +40,18 @@ def main() -> int:
         assert config is not None
         initialize_database(config.database_file)
 
-    def initialize_qt_application() -> None:
+    def initialize_qt_application() -> Callable[[], None]:
         nonlocal app
         app = QApplication(sys.argv)
         app.setApplicationName("ModLens")
         app.setOrganizationName("ModLens")
+        return app.quit
 
-    def initialize_main_window() -> None:
+    def initialize_main_window() -> Callable[[], None]:
         nonlocal window
         window = MainWindow()
         window.show()
+        return window.close
 
     def shutdown_application() -> None:
         try:
@@ -77,3 +82,5 @@ def main() -> int:
     finally:
         if lifecycle.state is LifecycleState.RUNNING:
             shutdown_application()
+
+        shutdown_logging()

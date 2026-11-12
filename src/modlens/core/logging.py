@@ -50,3 +50,13 @@ def configure_logging(level: str, log_file: Path) -> logging.Logger:
     logger.addHandler(handler)
 
     return logger
+
+
+def shutdown_logging() -> None:
+    """Remove and close only handlers owned by ModLens."""
+    logger = logging.getLogger(LOGGER_NAME)
+
+    for handler in list(logger.handlers):
+        if getattr(handler, HANDLER_MARKER, False):
+            logger.removeHandler(handler)
+            handler.close()

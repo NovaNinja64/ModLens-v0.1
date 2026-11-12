@@ -15,37 +15,58 @@ This repository contains the initial **Phase 0 foundation scaffold**. It establi
 - Git (optional, for source control)
 - GitHub Desktop (optional, for a graphical Git workflow)
 
+
 ## Set up
 
-From the repository folder:
+ModLens requires Python 3.11 or newer.
+
+Check your installed Python version:
 
 ```powershell
-py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -e ".[dev]"
-python -m modlens
+py --version
 ```
 
-If PowerShell blocks activation, run the application using the virtual environment's interpreter directly:
+Create a virtual environment from the repository folder:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+py -m venv .venv
+```
+
+Install the pinned development dependencies:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.lock
+```
+
+Install ModLens from the local repository:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e .
+```
+
+Launch ModLens:
+
+```powershell
 .\.venv\Scripts\python.exe -m modlens
 ```
+
+Using the virtual environment's Python executable directly avoids requiring PowerShell script activation permissions.
+
 
 ## Run tests
 
 ```powershell
-pytest
+.\.venv\Scripts\python.exe -m pytest
 ```
 
-## Data and safety
 
-- Application data is stored under the current user's local application-data directory.
-- The initial foundation does not modify game files, mod files, manager profiles, or load order.
-- Discovery and scanning features will be read-only by default.
-- Do not place credentials, API keys, personal game logs, or private configuration files in Git.
+## Run code quality checks
+
+```powershell
+.\.venv\Scripts\python.exe -m ruff check src/modlens tests
+```
+
 
 ## Development roadmap
 

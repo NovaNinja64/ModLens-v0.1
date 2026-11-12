@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 
 import pytest
 
-from modlens.core.logging import configure_logging
+from modlens.core.logging import configure_logging, shutdown_logging
 
 
 @pytest.fixture
@@ -147,3 +147,46 @@ def test_logging_creates_parent_directories(
     configure_logging("INFO", log_file)
 
     assert log_file.parent.is_dir()
+
+
+def test_shutdown_logging_removes_and_closes_owned_handlers(
+    modlens_logger, tmp_path
+):
+    configure_logging("INFO", tmp_path / "modlens.log")
+
+    handler = next(
+        handler
+        for handler in modlens_logger.handlers
+        if getattr(handler, "_modlens_handler", False)
+    )
+
+    shutdown_logging()
+
+    assert handler not in modlens_logger.handlers
+    assert handler.stream is None
+
+
+def test_shutdown_logging_preserves_third_party_handlers(
+    modlens_logger, tmp_path
+):
+    third_party_handler = logging.NullHandler()
+    modlens_logger.addHandler(third_party_handler)
+
+    configure_logging("INFO", tmp_path / "modlens.log")
+    shutdown_logging()
+
+    assert third_party_handler in modlens_logger.handlers
+
+
+def test_repeated_logging_shutdown_is_safe(
+    modlens_logger, tmp_path
+):
+    configure_logging("INFO", tmp_path / "modlens.log")
+
+    shutdown_logging()
+    shutdown_logging()
+
+    assert not any(
+        getattr(handler, "_modlens_handler", False)
+        for handler in modlens_logger.handlers
+    )
