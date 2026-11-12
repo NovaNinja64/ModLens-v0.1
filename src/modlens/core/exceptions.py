@@ -35,3 +35,19 @@ class PathAccessError(DiscoveryError):
 
 class ParseError(DiscoveryError):
     """A discovery source could not be parsed."""
+
+
+class ServiceRegistryError(ModLensError):
+    """Base exception for service registry failures."""
+
+
+class DuplicateServiceError(ServiceRegistryError):
+    """A service is already registered for the requested interface."""
+
+
+class ServiceNotFoundError(ServiceRegistryError):
+    """No service is registered for the requested interface."""
+
+
+class InvalidServiceRegistrationError(ServiceRegistryError):
+    """A service does not satisfy its declared registration interface."""
