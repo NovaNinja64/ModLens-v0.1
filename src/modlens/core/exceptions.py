@@ -51,3 +51,15 @@ class ServiceNotFoundError(ServiceRegistryError):
 
 class InvalidServiceRegistrationError(ServiceRegistryError):
     """A service does not satisfy its declared registration interface."""
+    
+
+class ApplicationLifecycleError(ModLensError):
+    """Base exception for application lifecycle failures."""
+
+
+class ApplicationStartupError(ApplicationLifecycleError):
+    """Application startup could not complete."""
+
+
+class ApplicationShutdownError(ApplicationLifecycleError):
+    """One or more application shutdown operations failed."""
