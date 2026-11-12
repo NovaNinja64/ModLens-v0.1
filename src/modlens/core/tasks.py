@@ -25,7 +25,7 @@ class FunctionTask(QRunnable):
         self.signals.started.emit()
         try:
             self.signals.result.emit(self.function(*self.args, **self.kwargs))
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             self.signals.failed.emit(f"{type(exc).__name__}: {exc}")
         finally:
             self.signals.finished.emit()

@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QLabel, QMainWindow, QListWidget, QStackedWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QLabel, QListWidget, QMainWindow, QStackedWidget, QVBoxLayout, QWidget
 
 
 class MainWindow(QMainWindow):
