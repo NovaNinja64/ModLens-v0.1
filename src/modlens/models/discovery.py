@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from modlens.models.base import ContractModel
 from modlens.models.enums import (
@@ -54,3 +54,11 @@ class DiscoveryProgressEvent(ContractModel):
     total_count: int | None = Field(default=None, ge=0)
     entity_type: DiscoveryEntityType | None = None
     entity_id: UUID | None = None
+
+    @field_validator("timestamp")
+    @classmethod
+    def require_timezone_aware_timestamp(cls, value: datetime) -> datetime:
+        """Reject ambiguous event times; callers must supply an explicit timezone."""
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("timestamp must be timezone-aware.")
+        return value
