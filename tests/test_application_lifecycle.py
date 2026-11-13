@@ -191,3 +191,29 @@ def test_shutdown_before_startup_is_safe() -> None:
     lifecycle.shutdown()
 
     assert lifecycle.state is LifecycleState.STOPPED
+
+
+def test_shutdown_after_startup_failure_is_safe() -> None:
+    lifecycle = ApplicationLifecycle()
+    cleanup_count = 0
+
+    def cleanup() -> None:
+        nonlocal cleanup_count
+        cleanup_count += 1
+
+    def fail_startup() -> None:
+        raise RuntimeError("Startup failed.")
+
+    lifecycle.add_step("First", lambda: cleanup)
+    lifecycle.add_step("Failure", fail_startup)
+
+    with pytest.raises(ApplicationStartupError):
+        lifecycle.start()
+
+    assert lifecycle.state is LifecycleState.FAILED
+    assert cleanup_count == 1
+
+    lifecycle.shutdown()
+
+    assert lifecycle.state is LifecycleState.STOPPED
+    assert cleanup_count == 1

@@ -2,8 +2,7 @@
 """Thread-safe registry for application services.
 
 The registry protects its own mapping operations. It does not guarantee
-that registered service instances are themselves thread-safe.
-"""
+that registered service instances are themselves thread-safe."""
 
 from __future__ import annotations
 

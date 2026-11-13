@@ -55,6 +55,7 @@ def install_fakes(monkeypatch, *, exec_error=None):
         
         def quit(self):
             calls.append("quit")
+            self.aboutToQuit.callback()
 
     class FakeWindow:
         def __init__(self):
@@ -159,3 +160,17 @@ def test_event_loop_failure_still_triggers_shutdown(monkeypatch):
     ]
     assert lifecycle_instances[0].state is LifecycleState.STOPPED
     assert lifecycle_instances[0].shutdown_calls == 1
+
+
+def test_reentrant_about_to_quit_does_not_shutdown_twice(monkeypatch):
+    calls, lifecycle_instances = install_fakes(monkeypatch)
+
+    result = app_module.main()
+
+    assert result == 0
+    assert lifecycle_instances[0].state is LifecycleState.STOPPED
+    assert lifecycle_instances[0].shutdown_calls == 1
+    assert calls.count("shutdown") == 1
+    assert calls.count("close") == 1
+    assert calls.count("quit") == 1
+    assert calls.count("logging_shutdown") == 1

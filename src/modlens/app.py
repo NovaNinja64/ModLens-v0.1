@@ -54,6 +54,12 @@ def main() -> int:
         return window.close
 
     def shutdown_application() -> None:
+        if lifecycle.state in {
+            LifecycleState.STOPPING,
+            LifecycleState.STOPPED,
+        }:
+            return
+
         try:
             lifecycle.shutdown()
         except ApplicationShutdownError:
